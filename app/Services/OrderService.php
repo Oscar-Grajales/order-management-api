@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\ProcessOrderJob;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,8 @@ class OrderService
             foreach ($itemsData as $data) {
                 $order->items()->create($data);
             }
+
+            ProcessOrderJob::dispatch($order);
 
             return $order;
         });
