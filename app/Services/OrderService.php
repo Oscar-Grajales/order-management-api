@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Jobs\ProcessOrderJob;
 use App\Models\Order;
 use App\Models\Product;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -56,5 +57,26 @@ class OrderService
 
             return $order;
         });
+    }
+
+    public function list(array $filters = []): LengthAwarePaginator
+    {
+        $query = Order::query();
+
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (isset($filters['from'])) {
+            $query->whereDate('created_at', '>=', $filters['from']);
+        }
+
+        if (isset($filters['to'])) {
+            $query->whereDate('created_at', '<=', $filters['to']);
+        }
+
+        return $query
+            ->latest()
+            ->paginate(15);
     }
 }
