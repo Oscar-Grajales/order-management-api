@@ -18,9 +18,20 @@ class OrderController extends Controller
             $itemsData = [];
 
             foreach ($request->items as $item) {
-                $product = Product::query()->findOrFail($item['product_id']);
+                $product = Product::query()
+                    ->where('id', $item['product_id'])
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if ($product->stock < $item['quantity']) {
+                    abort(400, 'Insufficient stock for product: ' . $product->name);
+                }
+
+                $product->decrement('stock', $item['quantity']);
+
                 $total = $product->price * $item['quantity'];
                 $subtotal += $total;
+
                 $itemsData[] = [
                     'product_id' => $item['product_id'],
                     'product_name' => $product->name,
