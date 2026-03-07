@@ -20,7 +20,8 @@ class OrderService
             $cacheKey,
             60,
             function () use ($filters) {
-                $query = Order::query();
+                $query = Order::query()
+                    ->with('items');
 
                 if (isset($filters['status'])) {
                     $query->where('status', $filters['status']);
